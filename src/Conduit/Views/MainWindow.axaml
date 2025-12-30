@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:console="https://github.com/jinek/consolonia"
+		xmlns:wm="clr-namespace:Iciclecreek.Avalonia.WindowManager;assembly=Iciclecreek.Avalonia.WindowManager"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Conduit.MainWindow"
+		RequestedThemeVariant="Dark"
+		Icon="/Assets/avalonia-logo.ico"
+		Title="Conduit">
+	<DockPanel>
+		<Menu DockPanel.Dock="Top">
+			<MenuItem Header="_Start">
+				<MenuItem Header="_New" Click="OnNewClicked"/>
+				<MenuItem Header="_Run" Click="OnStartClicked"/>
+				<Separator/>
+				<MenuItem Header="E_xit" Click="OnExitClicked"/>
+			</MenuItem>
+		</Menu>
+
+		<wm:WindowsPanel x:Name="Windows" Background="DarkGray"/>
+	</DockPanel>
+</Window>
+
+
+</Window>
