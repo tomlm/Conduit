@@ -21,7 +21,7 @@ namespace Conduit.Views
             //lifetime!.Shutdown();
         }
 
-        private void OnNewClicked(object? sender, RoutedEventArgs e)
+        private void OnNewTerminal(object? sender, RoutedEventArgs e)
         {
             var terminalWindow = new ManagedTerminalWindow
             {
@@ -34,7 +34,7 @@ namespace Conduit.Views
         }
 
 
-        private async void OnStartClicked(object? sender, RoutedEventArgs e)
+        private async void OnCustomTerminal(object? sender, RoutedEventArgs e)
         {
             var dialog = new CommandLineDialog();
             var result = await dialog.ShowDialog<bool?>(this);

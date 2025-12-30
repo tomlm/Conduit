@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace Conduit.ViewModel
 {
     [ObservableObject]
-    public partial class ConduitViewModel 
+    public partial class AppViewModel 
     {
         [ObservableProperty]
         private string _theme;
