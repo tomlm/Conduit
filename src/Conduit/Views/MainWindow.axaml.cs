@@ -44,11 +44,12 @@ namespace Conduit.Views
                 var commandLine = dialog.CommandLine.Trim();
                 var parts = ParseCommandLine(commandLine);
                 var process = parts.Count > 0 ? parts[0] : commandLine;
-                var args = parts.Count > 1 ? parts.GetRange(1, parts.Count - 1) : [];
+                var args = parts.Count > 1 ? parts.GetRange(1, parts.Count - 1) : new List<string>();
+                args.Insert(0, $"/C {process}") ;
 
                 var terminalWindow = new ManagedTerminalWindow
                 {
-                    Process = process,
+                    Process = "cmd.exe",
                     Args = args,
                     Title = process,
                     Width = 80 ,
