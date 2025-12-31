@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Consolonia" Version="11.3.9-beta.2218" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <!--<PackageReference Include="Iciclecreek.Avalonia.WindowManager" Version="3.0.12" />-->
+    <PackageReference Include="Iciclecreek.Avalonia.Terminal" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,7 +18,7 @@
     <Folder Include="Tools\" />
   </ItemGroup>
 
-  <ItemGroup>
+   <ItemGroup Condition="'$(BuildingInsideVisualStudio)' == 'true'">
     <ProjectReference Include="..\..\..\Iciclecreek.Avalonia.Terminal\src\Iciclecreek.Avalonia.TerminalWindow\Iciclecreek.Avalonia.Terminal.csproj" />
   </ItemGroup>
 
