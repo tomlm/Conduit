@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -19,41 +20,20 @@ namespace Conduit.Controls
     public partial class ManagedTerminalWindow : ManagedWindow
     {
         private TerminalControl? _terminalControl;
+        private bool _restoringFocus;
 
-        /// <summary>
-        /// Event raised when the PTY process exits.
-        /// </summary>
-        public event EventHandler<ProcessExitedEventArgs>? ProcessExited;
-
-        /// <summary>
-        /// Event raised when the terminal title changes.
-        /// </summary>
-        public event EventHandler<TitleChangedEventArgs>? TitleChanged;
-
-        /// <summary>
-        /// Event raised when a window move command is received from the terminal.
-        /// </summary>
-        public event EventHandler<WindowMovedEventArgs>? WindowMoved;
-
-        /// <summary>
-        /// Event raised when a window resize command is received from the terminal.
-        /// </summary>
-        public event EventHandler<Iciclecreek.Terminal.WindowResizedEventArgs>? WindowResized;
-
-        /// <summary>
-        /// Event raised when the terminal bell is activated.
-        /// </summary>
-        public event EventHandler? BellRang;
-
-        /// <summary>
-        /// Event raised when window information is requested by the terminal.
-        /// </summary>
-        public event EventHandler<WindowInfoRequestedEventArgs>? WindowInfoRequested;
+        // Window-related events are now exposed by `TerminalView` as bubbling attached events.
 
         public static readonly StyledProperty<TextDecorationLocation?> TextDecorationsProperty =
             AvaloniaProperty.Register<ManagedTerminalWindow, TextDecorationLocation?>(
                 nameof(TextDecorations),
                 defaultValue: null);
+
+        public static readonly StyledProperty<XTerm.Options.TerminalOptions?> OptionsProperty =
+            AvaloniaProperty.Register<TerminalWindow, XTerm.Options.TerminalOptions?>(
+                nameof(Options),
+                defaultValue: null);
+
 
         public static readonly StyledProperty<IBrush> SelectionBrushProperty =
             AvaloniaProperty.Register<ManagedTerminalWindow, IBrush>(
@@ -78,16 +58,6 @@ namespace Conduit.Controls
         public static readonly StyledProperty<bool> CloseOnProcessExitProperty =
             AvaloniaProperty.Register<ManagedTerminalWindow, bool>(
                 nameof(CloseOnProcessExit),
-                defaultValue: true);
-
-        public static readonly StyledProperty<bool> UpdateTitleFromTerminalProperty =
-            AvaloniaProperty.Register<ManagedTerminalWindow, bool>(
-                nameof(UpdateTitleFromTerminal),
-                defaultValue: true);
-
-        public static readonly StyledProperty<bool> HandleWindowCommandsProperty =
-            AvaloniaProperty.Register<ManagedTerminalWindow, bool>(
-                nameof(HandleWindowCommands),
                 defaultValue: true);
 
         /// <summary>
@@ -145,21 +115,12 @@ namespace Conduit.Controls
         }
 
         /// <summary>
-        /// Gets or sets whether the window title should be updated from terminal escape sequences.
+        /// Gets or sets the terminal options.
         /// </summary>
-        public bool UpdateTitleFromTerminal
+        public XTerm.Options.TerminalOptions? Options
         {
-            get => GetValue(UpdateTitleFromTerminalProperty);
-            set => SetValue(UpdateTitleFromTerminalProperty, value);
-        }
-
-        /// <summary>
-        /// Gets or sets whether window manipulation commands from the terminal should be handled.
-        /// </summary>
-        public bool HandleWindowCommands
-        {
-            get => GetValue(HandleWindowCommandsProperty);
-            set => SetValue(HandleWindowCommandsProperty, value);
+            get => GetValue(OptionsProperty);
+            set => SetValue(OptionsProperty, value);
         }
 
         static ManagedTerminalWindow()
@@ -170,71 +131,134 @@ namespace Conduit.Controls
 
         public ManagedTerminalWindow()
         {
+            this.Position = new PixelPoint(0, 0);
+
+            // Set focus to terminal when window opens or is activated
+            Opened += OnOpened;
+            Activated += OnActivated;
+            Deactivated += OnDeactivated;
+
+            // Clicking the native title bar/chrome can steal keyboard focus to a non-content element
+            // (especially on Linux/Wayland). Proactively restore focus on any pointer press.
+            // This runs only when we're active and doesn't try to fight activation.
+            // Use Bubble so we don't interfere with the system caption buttons (close/maximize/minimize).
+            AddHandler(PointerPressedEvent, OnAnyPointerPressed, RoutingStrategies.Bubble);
+
+        }
+
+        protected override void OnInitialized()
+        {
             // Create the terminal control as content
+            Options = this.Options ?? new XTerm.Options.TerminalOptions();
+            Options.WindowOptions.GetWinPosition = true;
+            Options.WindowOptions.GetWinSizePixels = true;
+            Options.WindowOptions.GetWinSizeChars = true;
+            Options.WindowOptions.GetScreenSizePixels = true;
+            Options.WindowOptions.GetCellSizePixels = true;
+            Options.WindowOptions.GetIconTitle = true;
+            Options.WindowOptions.GetWinTitle = true;
+            Options.WindowOptions.GetWinState = true;
+            Options.WindowOptions.SetWinPosition = true;
+            Options.WindowOptions.SetWinSizePixels = true;
+            Options.WindowOptions.SetWinSizeChars = true;
+            Options.WindowOptions.RaiseWin = true;
+            Options.WindowOptions.LowerWin = true;
+            Options.WindowOptions.RefreshWin = true;
+            Options.WindowOptions.RestoreWin = true;
+            Options.WindowOptions.MaximizeWin = true;
+            Options.WindowOptions.MinimizeWin = true;
+            Options.WindowOptions.FullscreenWin = true;
+
             _terminalControl = new TerminalControl()
             {
+                Options = this.Options,
                 FontFamily = this.FontFamily,
                 FontSize = this.FontSize,
                 Foreground = this.Foreground,
                 Background = this.Background,
             };
-            Content = _terminalControl;
 
-            // Set focus to terminal when window opens or is activated
-            Opened += OnOpened;
-            Activated += OnActivated;
-
-            // Wire up events
-            _terminalControl.ProcessExited += OnTerminalControlProcessExited;
-            _terminalControl.TitleChanged += OnTerminalControlTitleChanged;
-            _terminalControl.WindowMoved += OnTerminalControlWindowMoved;
-            _terminalControl.WindowResized += OnTerminalControlWindowResized;
-            _terminalControl.WindowMinimized += OnTerminalControlWindowMinimized;
-            _terminalControl.WindowMaximized += OnTerminalControlWindowMaximized;
-            _terminalControl.WindowRestored += OnTerminalControlWindowRestored;
-            _terminalControl.WindowRaised += OnTerminalControlWindowRaised;
-            _terminalControl.WindowLowered += OnTerminalControlWindowLowered;
-            _terminalControl.WindowFullscreened += OnTerminalControlWindowFullscreened;
-            _terminalControl.BellRang += OnTerminalControlBellRang;
-            _terminalControl.WindowInfoRequested += OnTerminalControlWindowInfoRequested;
+            // Subscribe to TerminalView attached events bubbling from the inner TerminalView.
+            TerminalView.AddProcessExitedHandler(_terminalControl, OnTerminalControlProcessExited);
+            TerminalView.AddTitleChangedHandler(_terminalControl, OnTerminalTitleChanged);
+            TerminalView.AddWindowMovedHandler(_terminalControl, OnTerminalWindowMoved);
+            TerminalView.AddWindowResizedHandler(_terminalControl, OnTerminalWindowResized);
+            TerminalView.AddWindowMinimizedHandler(_terminalControl, OnTerminalWindowMinimized);
+            TerminalView.AddWindowMaximizedHandler(_terminalControl, OnTerminalWindowMaximized);
+            TerminalView.AddWindowRestoredHandler(_terminalControl, OnTerminalWindowRestored);
+            TerminalView.AddWindowRaisedHandler(_terminalControl, OnTerminalWindowRaised);
+            TerminalView.AddWindowLoweredHandler(_terminalControl, OnTerminalWindowLowered);
+            TerminalView.AddWindowFullscreenedHandler(_terminalControl, OnTerminalWindowFullscreened);
+            TerminalView.AddBellRangHandler(_terminalControl, OnTerminalBellRang);
+            TerminalView.AddWindowInfoRequestedHandler(_terminalControl, OnTerminalWindowInfoRequested);
 
             // Bind properties from Window to TerminalControl
             _terminalControl.Bind(TerminalControl.FontFamilyProperty, this.GetObservable(FontFamilyProperty));
             _terminalControl.Bind(TerminalControl.FontSizeProperty, this.GetObservable(FontSizeProperty));
             _terminalControl.Bind(TerminalControl.FontStyleProperty, this.GetObservable(FontStyleProperty));
             _terminalControl.Bind(TerminalControl.FontWeightProperty, this.GetObservable(FontWeightProperty));
-            _terminalControl.Bind(TemplatedControl.ForegroundProperty, this.GetObservable(ForegroundProperty));
-            _terminalControl.Bind(TemplatedControl.BackgroundProperty, this.GetObservable(BackgroundProperty));
+            //_terminalControl.Bind(TemplatedControl.ForegroundProperty, this.GetObservable(ForegroundProperty));
+            //_terminalControl.Bind(TemplatedControl.BackgroundProperty, this.GetObservable(BackgroundProperty));
             _terminalControl.Bind(TerminalControl.TextDecorationsProperty, this.GetObservable(TextDecorationsProperty));
             _terminalControl.Bind(TerminalControl.SelectionBrushProperty, this.GetObservable(SelectionBrushProperty));
             _terminalControl.Bind(TerminalControl.ProcessProperty, this.GetObservable(ProcessProperty));
             _terminalControl.Bind(TerminalControl.ArgsProperty, this.GetObservable(ArgsProperty));
             _terminalControl.Bind(TerminalControl.BufferSizeProperty, this.GetObservable(BufferSizeProperty));
+            Content = _terminalControl;
         }
 
         private void OnOpened(object? sender, EventArgs e)
         {
-            // Defer focus until layout is ready, but only if this window is active
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (IsActive)
-                {
-                    _terminalControl?.Focus();
-                }
-            }, DispatcherPriority.Input);
+            RestoreTerminalFocus();
         }
 
         private void OnActivated(object? sender, EventArgs e)
         {
-            // Defer focus until layout is ready
-            // Only focus the terminal if it doesn't already have focus
-            Dispatcher.UIThread.Post(() => 
+            RestoreTerminalFocus();
+        }
+
+        private void OnDeactivated(object? sender, EventArgs e)
+        {
+            // Focus contract: for ManagedTerminalWindow we always want terminal focused.
+            // We don't need to "remember" any other element.
+        }
+
+        private void RestoreTerminalFocus()
+        {
+            if (_terminalControl == null)
+                return;
+
+            if (_restoringFocus)
+                return;
+
+            _restoringFocus = true;
+            try
             {
-                if (_terminalControl != null && !_terminalControl.IsFocused)
+                // Don't fight window activation. We'll be called again on Activated.
+                if (!IsActive)
+                    return;
+
+                // Post a few times: on Linux/Wayland/X11 focus/activation and layout settle
+                // across multiple ticks (especially after closing another window).
+                for (var i = 0; i < 1; i++)
                 {
-                    _terminalControl.Focus();
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        if (!IsActive || _terminalControl == null)
+                            return;
+
+                        if (!_terminalControl.IsKeyboardFocusWithin)
+                        {
+                            _terminalControl.Focus();
+                        }
+                    }, DispatcherPriority.Input);
                 }
-            }, DispatcherPriority.Input);
+            }
+            finally
+            {
+                // Allow subsequent activations to restore.
+                Dispatcher.UIThread.Post(() => _restoringFocus = false, DispatcherPriority.Background);
+            }
         }
 
         protected override void OnUnloaded(RoutedEventArgs e)
@@ -243,131 +267,132 @@ namespace Conduit.Controls
 
             Opened -= OnOpened;
             Activated -= OnActivated;
+            Deactivated -= OnDeactivated;
+
+            RemoveHandler(PointerPressedEvent, OnAnyPointerPressed);
 
             if (_terminalControl != null)
             {
-                _terminalControl.ProcessExited -= OnTerminalControlProcessExited;
-                _terminalControl.TitleChanged -= OnTerminalControlTitleChanged;
-                _terminalControl.WindowMoved -= OnTerminalControlWindowMoved;
-                _terminalControl.WindowResized -= OnTerminalControlWindowResized;
-                _terminalControl.WindowMinimized -= OnTerminalControlWindowMinimized;
-                _terminalControl.WindowMaximized -= OnTerminalControlWindowMaximized;
-                _terminalControl.WindowRestored -= OnTerminalControlWindowRestored;
-                _terminalControl.WindowRaised -= OnTerminalControlWindowRaised;
-                _terminalControl.WindowLowered -= OnTerminalControlWindowLowered;
-                _terminalControl.WindowFullscreened -= OnTerminalControlWindowFullscreened;
-                _terminalControl.BellRang -= OnTerminalControlBellRang;
-                _terminalControl.WindowInfoRequested -= OnTerminalControlWindowInfoRequested;
+                TerminalView.RemoveProcessExitedHandler(_terminalControl, OnTerminalControlProcessExited);
+                TerminalView.RemoveTitleChangedHandler(_terminalControl, OnTerminalTitleChanged);
+                TerminalView.RemoveWindowMovedHandler(_terminalControl, OnTerminalWindowMoved);
+                TerminalView.RemoveWindowResizedHandler(_terminalControl, OnTerminalWindowResized);
+                TerminalView.RemoveWindowMinimizedHandler(_terminalControl, OnTerminalWindowMinimized);
+                TerminalView.RemoveWindowMaximizedHandler(_terminalControl, OnTerminalWindowMaximized);
+                TerminalView.RemoveWindowRestoredHandler(_terminalControl, OnTerminalWindowRestored);
+                TerminalView.RemoveWindowRaisedHandler(_terminalControl, OnTerminalWindowRaised);
+                TerminalView.RemoveWindowLoweredHandler(_terminalControl, OnTerminalWindowLowered);
+                TerminalView.RemoveWindowFullscreenedHandler(_terminalControl, OnTerminalWindowFullscreened);
+                TerminalView.RemoveBellRangHandler(_terminalControl, OnTerminalBellRang);
+                TerminalView.RemoveWindowInfoRequestedHandler(_terminalControl, OnTerminalWindowInfoRequested);
             }
+        }
+
+        private void OnAnyPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            // Capture focus *after* the click is processed by the target.
+            // This avoids breaking the window chrome buttons while still reliably restoring
+            // focus after clicking the title bar/background.
+            Dispatcher.UIThread.Post(RestoreTerminalFocus, DispatcherPriority.Background);
         }
 
         private void OnTerminalControlProcessExited(object? sender, ProcessExitedEventArgs e)
         {
-            ProcessExited?.Invoke(this, e);
-
             if (CloseOnProcessExit)
             {
                 Close();
             }
         }
 
-        private void OnTerminalControlTitleChanged(object? sender, TitleChangedEventArgs e)
+        private void OnTerminalTitleChanged(object? sender, TitleChangedEventArgs e)
         {
-            TitleChanged?.Invoke(this, e);
-
-            if (UpdateTitleFromTerminal)
+            if (!e.Handled)
             {
                 Title = e.Title;
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlWindowMoved(object? sender, WindowMovedEventArgs e)
+        private void OnTerminalWindowMoved(object? sender, WindowMovedEventArgs e)
         {
-            WindowMoved?.Invoke(this, e);
-
-            if (HandleWindowCommands)
+            if (!e.Handled)
             {
                 Position = new PixelPoint(e.X, e.Y);
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlWindowResized(object? sender, Iciclecreek.Terminal.WindowResizedEventArgs e)
+        private void OnTerminalWindowResized(object? sender, Iciclecreek.Terminal.WindowResizedEventArgs e)
         {
-            WindowResized?.Invoke(this, e);
-
-            if (HandleWindowCommands)
+            if (!e.Handled)
             {
-                Width = e.Width;
-                Height = e.Height;
+                this.Width = e.Width;
+                this.Height = e.Height;
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlWindowMinimized(object? sender, EventArgs e)
+        private void OnTerminalWindowMinimized(object? sender, RoutedEventArgs e)
         {
-            if (HandleWindowCommands)
+            if (!e.Handled)
             {
-                WindowState = WindowState.Minimized;
+                this.WindowState = WindowState.Minimized;
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlWindowMaximized(object? sender, EventArgs e)
+        private void OnTerminalWindowMaximized(object? sender, RoutedEventArgs e)
         {
-            if (HandleWindowCommands)
+            if (!e.Handled)
             {
-                WindowState = WindowState.Maximized;
+                this.WindowState = WindowState.Maximized;
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlWindowRestored(object? sender, EventArgs e)
+        private void OnTerminalWindowRestored(object? sender, RoutedEventArgs e)
         {
-            if (HandleWindowCommands)
+            if (!e.Handled)
             {
-                WindowState = WindowState.Normal;
+                this.WindowState = WindowState.Normal;
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlWindowRaised(object? sender, EventArgs e)
+        private void OnTerminalWindowRaised(object? sender, RoutedEventArgs e)
         {
-            if (HandleWindowCommands && !IsActive)
+            if (!e.Handled)
             {
-                Activate();
+                this.BringToTop();
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlWindowLowered(object? sender, EventArgs e)
+        private void OnTerminalWindowLowered(object? sender, RoutedEventArgs e)
         {
-            if (HandleWindowCommands)
+            if (!e.Handled)
             {
-                // Avalonia doesn't have a direct "lower window" API, but we can try to deactivate
-                // This is a best-effort implementation
-                Topmost = false;
+                this.NextWindow();
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlWindowFullscreened(object? sender, EventArgs e)
+        private void OnTerminalWindowFullscreened(object? sender, RoutedEventArgs e)
         {
-            if (HandleWindowCommands)
+            if (!e.Handled)
             {
                 WindowState = WindowState.FullScreen;
+                e.Handled = true;
             }
         }
 
-        private void OnTerminalControlBellRang(object? sender, EventArgs e)
+        private void OnTerminalBellRang(object? sender, RoutedEventArgs e)
         {
-            BellRang?.Invoke(this, EventArgs.Empty);
-            
-            // Default bell behavior - could flash the window or play a sound
-            // Note: We intentionally do NOT activate the window here as it would
-            // steal focus from other terminal windows and cause input routing issues.
-            // Applications can subscribe to BellRang event for custom behavior.
+            // no-op by default
         }
 
-        private void OnTerminalControlWindowInfoRequested(object? sender, WindowInfoRequestedEventArgs e)
+        private void OnTerminalWindowInfoRequested(object? sender, WindowInfoRequestedEventArgs e)
         {
-            // Raise the event so external handlers can respond
-            WindowInfoRequested?.Invoke(this, e);
-            
-            // If not handled externally, provide default responses from the window
             if (!e.Handled)
             {
                 switch (e.Request)
@@ -376,21 +401,20 @@ namespace Conduit.Controls
                         e.IsIconified = WindowState == WindowState.Minimized;
                         e.Handled = true;
                         break;
-                        
+
                     case XTerm.Common.WindowInfoRequest.Position:
                         e.X = Position.X;
                         e.Y = Position.Y;
                         e.Handled = true;
                         break;
-                        
+
                     case XTerm.Common.WindowInfoRequest.SizePixels:
                         e.WidthPixels = (int)Width;
                         e.HeightPixels = (int)Height;
                         e.Handled = true;
                         break;
-                        
+
                     case XTerm.Common.WindowInfoRequest.ScreenSizePixels:
-                        // Get screen size from the current screen
                         var screen = Screens.ScreenFromWindow((object)this as WindowBase);
                         if (screen != null)
                         {
@@ -399,16 +423,13 @@ namespace Conduit.Controls
                             e.Handled = true;
                         }
                         break;
-                        
+
                     case XTerm.Common.WindowInfoRequest.CellSizePixels:
-                        // Cell size is derived from font metrics in TerminalView
-                        // We need to expose this from the terminal control
-                        // For now, use reasonable defaults based on typical terminal fonts
-                        e.CellWidth = (int)(FontSize * 0.6);  // Approximate monospace width
-                        e.CellHeight = (int)(FontSize * 1.2); // Approximate line height
+                        e.CellWidth = (int)(FontSize * 0.6);
+                        e.CellHeight = (int)(FontSize * 1.2);
                         e.Handled = true;
                         break;
-                        
+
                     case XTerm.Common.WindowInfoRequest.Title:
                     case XTerm.Common.WindowInfoRequest.IconTitle:
                         e.Title = Title;
