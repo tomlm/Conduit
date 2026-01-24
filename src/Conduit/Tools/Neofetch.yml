@@ -1,0 +1,24 @@
+id: neofetch
+name: Neofetch
+version: 1.0.0
+author: Neofetch contributors
+description: Command-line system information tool
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y neofetch
+    uninstall: sudo apt-get remove -y neofetch
+command: neofetch
+args: ""
+source: https://github.com/dylanaraps/neofetch
+website: https://github.com/dylanaraps/neofetch
+documentation: https://github.com/dylanaraps/neofetch#readme
+keywords:
+  - terminal
+  - system
+  - info
+icon:
+  - info
+  - info
+  - info
+  - info

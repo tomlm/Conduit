@@ -1,0 +1,25 @@
+id: htop
+name: htop
+version: 1.0.0
+author: htop contributors
+description: Interactive process viewer
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y htop
+    uninstall: sudo apt-get remove -y htop
+command: htop
+args: ""
+source: https://github.com/htop-dev/htop
+website: https://htop.dev/
+documentation: https://github.com/htop-dev/htop#readme
+keywords:
+  - tui
+  - process
+  - monitor
+  - terminal
+icon:
+  - htop
+  - htop
+  - htop
+  - htop

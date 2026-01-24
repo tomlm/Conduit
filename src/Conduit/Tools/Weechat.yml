@@ -1,0 +1,28 @@
+id: weechat
+name: WeeChat
+version: 1.0.0
+author: WeeChat contributors
+description: Fast, light and extensible chat client
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y weechat
+    uninstall: sudo apt-get remove -y weechat
+  windows:
+    install: winget install -e --id Weechat.Weechat
+    uninstall: winget uninstall -e --id Weechat.Weechat
+command: weechat
+args: ""
+source: https://github.com/weechat/weechat
+website: https://weechat.org/
+documentation: https://weechat.org/doc/
+keywords:
+  - tui
+  - chat
+  - irc
+  - terminal
+icon:
+  - chat
+  - chat
+  - chat
+  - chat

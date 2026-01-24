@@ -1,20 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Conduit.ViewModel
 {
-    [Flags]
-    public enum ToolPlatforms
-    {
-        None = 0,
-        Windows = 1,
-        Linux = 2,
-        MacOS = 4,
-        All = Windows | Linux | MacOS,
-    }
-
     /// <summary>
     /// View model for a tool
     /// </summary>
@@ -64,21 +53,7 @@ namespace Conduit.ViewModel
         [ObservableProperty]
         private string _website = "about:blank";
 
-        /// <summary>
-        /// command to install
-        /// </summary>
-        [ObservableProperty]
-        [Required]
-        [MinLength(1)]
-        private string _install = string.Empty;
-
-        /// <summary>
-        /// command to uninstall
-        /// </summary>
-        [ObservableProperty]
-        [Required]
-        [MinLength(1)]
-        private string _uninstall = string.Empty;
+        public PlatformInstallDefinitions Platforms { get; set; } = new();
 
         /// <summary>
         /// Keywords for the tool
@@ -86,9 +61,9 @@ namespace Conduit.ViewModel
         [ObservableProperty]
         private ObservableCollection<string> _keywords = new ObservableCollection<string>();
 
-        [ObservableProperty]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        private ToolPlatforms _platforms = ToolPlatforms.All;
+        public string Install => GetInstallDefinitionForCurrentPlatform()?.Install ?? string.Empty;
+
+        public string Uninstall => GetInstallDefinitionForCurrentPlatform()?.Uninstall ?? string.Empty;
 
         /// <summary>
         /// Command to execute tool
@@ -129,6 +104,42 @@ namespace Conduit.ViewModel
         {
             var context = new ValidationContext(this);
             Validator.ValidateObject(this, context, validateAllProperties: true);
+
+            if (Platforms == null)
+            {
+                throw new ValidationException("A tool must define platform install entries.");
+            }
+
+            var entries = new[] { Platforms.Default, Platforms.Windows, Platforms.Linux, Platforms.MacOS }
+                .Where(e => e != null)
+                .Cast<InstallDefinition>()
+                .ToList();
+
+            if (entries.Count == 0)
+            {
+                throw new ValidationException("A tool must define at least one platform install entry.");
+            }
+
+            foreach (var entry in entries)
+            {
+                var entryContext = new ValidationContext(entry);
+                Validator.ValidateObject(entry, entryContext, validateAllProperties: true);
+            }
+        }
+
+        private InstallDefinition? GetInstallDefinitionForCurrentPlatform()
+        {
+            if (Platforms == null)
+            {
+                return null;
+            }
+
+            var specific = OperatingSystem.IsWindows() ? Platforms.Windows
+                : OperatingSystem.IsLinux() ? Platforms.Linux
+                : OperatingSystem.IsMacOS() ? Platforms.MacOS
+                : null;
+
+            return specific ?? Platforms.Default;
         }
     }
 }

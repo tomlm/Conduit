@@ -4,14 +4,15 @@ version: 1.0.0
 author: Tom Laird-McConnell & Evgeny Gorbovoy
 description: Full text editor with TextMate themes
 license: MIT
-install: dotnet install -g Edit --pre-release
-uninstall: dotnet uninstall -g Edit
+platforms:
+  windows:
+    install: winget install Microsoft.Edit
+    uninstall: winget uninstall Microsoft.Edit
 command: Edit
 args: "%1? %2? %3? %4? %5?"
 source: https://github.com/consolonia/Edit
 website: https://github.com/consolonia/Edit
 documentation: https://github.com/consolonia/Edit/wiki
-platforms: windows
 keywords:
   - text editor
   - code editor

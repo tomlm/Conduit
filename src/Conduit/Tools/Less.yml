@@ -1,0 +1,24 @@
+id: less
+name: less
+version: 1.0.0
+author: Mark Nudelman et al.
+description: Terminal pager program for viewing text one screen at a time
+license: GPL-3.0
+platforms:
+  windows:
+    install: winget install -e --id Git.Git
+    uninstall: winget uninstall -e --id Git.Git
+command: less
+args: "%1?"
+source: https://www.greenwoodsoftware.com/less/
+website: https://www.greenwoodsoftware.com/less/
+documentation: https://www.greenwoodsoftware.com/less/
+keywords:
+  - pager
+  - terminal
+  - less
+icon:
+  - less
+  - less
+  - less
+  - less

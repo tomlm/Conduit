@@ -1,0 +1,24 @@
+id: ranger
+name: ranger
+version: 1.0.0
+author: ranger contributors
+description: Console file manager with VI key bindings
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y ranger
+    uninstall: sudo apt-get remove -y ranger
+command: ranger
+args: "%1?"
+source: https://github.com/ranger/ranger
+website: https://github.com/ranger/ranger
+documentation: https://github.com/ranger/ranger#readme
+keywords:
+  - tui
+  - file manager
+  - terminal
+icon:
+  - rang
+  - rang
+  - rang
+  - rang

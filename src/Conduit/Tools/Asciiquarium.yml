@@ -1,0 +1,25 @@
+id: asciiquarium
+name: asciiquarium
+version: 1.0.0
+author: Kirk Baucom
+description: ASCII aquarium animation for the terminal
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo snap install asciiquarium
+    uninstall: sudo snap remove asciiquarium
+command: asciiquarium
+args: ""
+source: https://github.com/cmatsuoka/asciiquarium
+website: https://github.com/cmatsuoka/asciiquarium
+documentation: https://github.com/cmatsuoka/asciiquarium#readme
+keywords:
+  - tui
+  - terminal
+  - fun
+  - ascii
+icon:
+  - aqua
+  - aqua
+  - aqua
+  - aqua

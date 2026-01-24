@@ -1,0 +1,25 @@
+id: cmus
+name: cmus
+version: 1.0.0
+author: cmus contributors
+description: Small, fast and powerful console music player
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y cmus
+    uninstall: sudo apt-get remove -y cmus
+command: cmus
+args: ""
+source: https://github.com/cmus/cmus
+website: https://cmus.github.io/
+documentation: https://github.com/cmus/cmus/wiki
+keywords:
+  - tui
+  - music
+  - player
+  - terminal
+icon:
+  - cmus
+  - cmus
+  - cmus
+  - cmus

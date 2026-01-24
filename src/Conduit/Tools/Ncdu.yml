@@ -1,0 +1,25 @@
+id: ncdu
+name: ncdu
+version: 1.0.0
+author: ncdu contributors
+description: NCurses Disk Usage
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y ncdu
+    uninstall: sudo apt-get remove -y ncdu
+command: ncdu
+args: "%1?"
+source: https://dev.yorhel.nl/ncdu
+website: https://dev.yorhel.nl/ncdu
+documentation: https://dev.yorhel.nl/ncdu
+keywords:
+  - tui
+  - disk
+  - du
+  - terminal
+icon:
+  - ncdu
+  - ncdu
+  - ncdu
+  - ncdu

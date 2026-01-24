@@ -4,8 +4,10 @@ version: 1.0.0
 author: Tom Laird-McConnell & Evgeny Gorbovoy
 description: Full text editor with TextMate themes
 license: MIT
-install: dotnet install -g Edit.NET --pre-release
-uninstall: dotnet uninstall -g Edit.NET
+platforms:
+  default:
+    install: dotnet tool install -g Edit.NET --prerelease
+    uninstall: dotnet tool uninstall -g Edit.NET
 command: Edit.NET
 args: "%1? %2? %3? %4? %5?"
 source: https://github.com/consolonia/Edit.NET
@@ -16,7 +18,6 @@ keywords:
   - code editor
   - textmate themes
   - syntax highlighting
-platforms: all
 icon:
   - Edit.NET
   - Edit.NET

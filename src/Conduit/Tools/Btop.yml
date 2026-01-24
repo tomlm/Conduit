@@ -1,0 +1,26 @@
+id: btop
+name: btop
+version: 1.0.0
+author: aristocratos
+description: Resource monitor in the terminal
+license: Apache-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y btop
+    uninstall: sudo apt-get remove -y btop
+command: btop
+args: ""
+source: https://github.com/aristocratos/btop
+website: https://github.com/aristocratos/btop
+documentation: https://github.com/aristocratos/btop#readme
+keywords:
+  - tui
+  - monitor
+  - cpu
+  - memory
+  - terminal
+icon:
+  - btop
+  - btop
+  - btop
+  - btop

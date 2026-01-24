@@ -1,0 +1,27 @@
+id: ripgrep
+name: ripgrep
+version: 1.0.0
+author: Andrew Gallant
+description: Line-oriented search tool that recursively searches directories for a regex pattern
+license: MIT OR Unlicense
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y ripgrep
+    uninstall: sudo apt-get remove -y ripgrep
+  windows:
+    install: winget install -e --id BurntSushi.ripgrep.MSVC
+    uninstall: winget uninstall -e --id BurntSushi.ripgrep.MSVC
+command: rg
+args: "%1?"
+source: https://github.com/BurntSushi/ripgrep
+website: https://github.com/BurntSushi/ripgrep
+documentation: https://github.com/BurntSushi/ripgrep#readme
+keywords:
+  - grep
+  - search
+  - terminal
+icon:
+  - rg
+  - rg
+  - rg
+  - rg

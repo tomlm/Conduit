@@ -1,0 +1,27 @@
+id: GNU.Nano
+name: GNU nano
+version: 1.0.0
+author: GNU nano contributors
+description: Simple, easy-to-use text editor for the terminal
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get install nano
+    uninstall: sudo apt-get remove nano
+  windows:
+    install: winget install -e --id GNU.Nano
+    uninstall: winget uninstall -e --id GNU.Nano
+command: nano
+args: "%1?"
+source: https://www.nano-editor.org/
+website: https://www.nano-editor.org/
+documentation: https://www.nano-editor.org/docs.php
+keywords:
+  - text editor
+  - terminal
+  - nano
+icon:
+  - nano
+  - nano
+  - nano
+  - nano
