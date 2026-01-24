@@ -1,14 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Iciclecreek.Avalonia.WindowManager;
 using Iciclecreek.Terminal;
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Conduit.Controls

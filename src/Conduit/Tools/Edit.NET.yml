@@ -5,6 +5,8 @@ command: Edit.NET
 args: "%1? %2? %3? %4? %5?"
 install: dotnet install -g Edit.NET --pre-release
 repository: https://github.com/consolonia/Edit.NET
+website: https://github.com/consolonia/Edit.NET
+license: MIT
 help: https://github.com/consolonia/Edit.Net/wiki
 icon:   
   Edit.NET

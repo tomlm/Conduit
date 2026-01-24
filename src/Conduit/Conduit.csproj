@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Consolonia" Version="11.3.9-beta.2218" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Iciclecreek.Avalonia.Terminal" Version="1.0.5" />
+    <PackageReference Include="Iciclecreek.Avalonia.Terminal" Version="1.0.6" />
   </ItemGroup>
 
   <ItemGroup>
