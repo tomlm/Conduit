@@ -1,6 +1,11 @@
-﻿using DynamicData;
+﻿using Lucene.Net.Analysis.Standard;
+using Lucene.Net.QueryParsers.Classic;
+using Lucene.Net.Search;
+using Lucene.Net.Util;
+using Newtonsoft.Json.Linq;
 using ObjectSearch;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using YamlConverter;
 
 namespace Conduit.ViewModel
@@ -32,7 +37,7 @@ namespace Conduit.ViewModel
                         var yaml = File.ReadAllText(file);
                         var tool = YamlConvert.DeserializeObject<ToolViewModel>(yaml);
                         tool.Validate();
-                        return tool; 
+                        return tool;
                     }
                     catch (Exception ex)
                     {
@@ -50,8 +55,14 @@ namespace Conduit.ViewModel
             {
                 return this;
             }
-
-            return _toolSearch.Search(query).Cast<ToolViewModel>();
+            try
+            {
+                return _toolSearch.Search<ToolViewModel>(query).Select(sr => sr.Value!).ToList();
+            }
+            catch (Exception)
+            {
+                return Array.Empty<ToolViewModel>();
+            }
         }
 
     }
