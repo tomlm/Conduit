@@ -11,6 +11,7 @@ args: "%1? %2? %3? %4? %5?"
 source: https://github.com/consolonia/Edit
 website: https://github.com/consolonia/Edit
 documentation: https://github.com/consolonia/Edit/wiki
+platforms: windows
 keywords:
   - text editor
   - code editor

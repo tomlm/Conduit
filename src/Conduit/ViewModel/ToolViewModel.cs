@@ -1,9 +1,20 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Conduit.ViewModel
 {
+    [Flags]
+    public enum ToolPlatforms
+    {
+        None = 0,
+        Windows = 1,
+        Linux = 2,
+        MacOS = 4,
+        All = Windows | Linux | MacOS,
+    }
+
     /// <summary>
     /// View model for a tool
     /// </summary>
@@ -74,6 +85,10 @@ namespace Conduit.ViewModel
         /// </summary>
         [ObservableProperty]
         private ObservableCollection<string> _keywords = new ObservableCollection<string>();
+
+        [ObservableProperty]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        private ToolPlatforms _platforms = ToolPlatforms.All;
 
         /// <summary>
         /// Command to execute tool
