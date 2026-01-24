@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace Conduit.ViewModel
 {
@@ -9,11 +10,12 @@ namespace Conduit.ViewModel
 
         public ToolsViewModel Tools { get; init; }
 
+        public HashSet<string> InstalledToolIds { get; } = new HashSet<string>();
+
         public AppViewModel()
         {
             Tools = new ToolsViewModel();
             Theme = "Light";
         }
-
     }
 }
