@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Conduit.ViewModel;
 using Conduit.Views;
 
 namespace Conduit
@@ -16,7 +17,10 @@ namespace Conduit
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
             {
-                desktopLifetime.MainWindow = new MainWindow();
+                desktopLifetime.MainWindow = new MainWindow
+                {
+                    DataContext = new AppViewModel()
+                };
             }
 
             base.OnFrameworkInitializationCompleted();

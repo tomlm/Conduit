@@ -1,16 +1,24 @@
+id: edit.net
 name: Edit.NET
+version: 1.0.0
 author: Tom Laird-McConnell & Evgeny Gorbovoy
 description: Full text editor with TextMate themes
+license: MIT
+install: dotnet install -g Edit.NET --pre-release
+uninstall: dotnet uninstall -g Edit.NET
 command: Edit.NET
 args: "%1? %2? %3? %4? %5?"
-install: dotnet install -g Edit.NET --pre-release
-repository: https://github.com/consolonia/Edit.NET
+source: https://github.com/consolonia/Edit.NET
 website: https://github.com/consolonia/Edit.NET
-license: MIT
-help: https://github.com/consolonia/Edit.Net/wiki
-icon:   
-  Edit.NET
-  Edit.NET
-  Edit.NET
-  Edit.NET
+documentation: https://github.com/consolonia/Edit.Net/wiki
+keywords:
+  - text editor
+  - code editor
+  - textmate themes
+  - syntax highlighting
+icon:
+  - Edit.NET
+  - Edit.NET
+  - Edit.NET
+  - Edit.NET
 
