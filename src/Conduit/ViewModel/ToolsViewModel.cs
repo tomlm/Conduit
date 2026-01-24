@@ -45,6 +45,22 @@ namespace Conduit.ViewModel
             _ = RefreshFromGitHubAsync();
         }
 
+        public IEnumerable<ToolViewModel> Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return this;
+            }
+            try
+            {
+                return _toolSearch.Search<ToolViewModel>(query).Select(sr => sr.Value!).ToList();
+            }
+            catch (Exception)
+            {
+                return Array.Empty<ToolViewModel>();
+            }
+        }
+
         private void AddToolsFromDirectory(string directory)
         {
             if (!Directory.Exists(directory))
@@ -199,22 +215,6 @@ namespace Conduit.ViewModel
 
             [JsonPropertyName("download_url")]
             public Uri? DownloadUrl { get; set; }
-        }
-
-        public IEnumerable<ToolViewModel> Search(string query)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return this;
-            }
-            try
-            {
-                return _toolSearch.Search<ToolViewModel>(query).Select(sr => sr.Value!).ToList();
-            }
-            catch (Exception)
-            {
-                return Array.Empty<ToolViewModel>();
-            }
         }
 
     }
