@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Conduit.Controls;
+using Conduit.ViewModel;
 
 namespace Conduit.Views
 {
@@ -19,6 +20,15 @@ namespace Conduit.Views
 
             //var lifetime = Application.Current!.ApplicationLifetime as IControlledApplicationLifetime;
             //lifetime!.Shutdown();
+        }
+
+        private void OnManageApps(object? sender, RoutedEventArgs e)
+        {
+            var dialog = new ManageAppsDialog
+            {
+                DataContext = this.DataContext
+            };
+            dialog.Show(Windows);
         }
 
         private void OnNewTerminal(object? sender, RoutedEventArgs e)

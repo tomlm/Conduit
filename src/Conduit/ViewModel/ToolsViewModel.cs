@@ -44,5 +44,15 @@ namespace Conduit.ViewModel
                 .Where(tool => tool != null));
         }
 
+        public IEnumerable<ToolViewModel> Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return this;
+            }
+
+            return _toolSearch.Search(query).Cast<ToolViewModel>();
+        }
+
     }
 }
