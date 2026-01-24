@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Conduit.Controls;
+using Conduit.Utilities;
 using Conduit.ViewModel;
 
 namespace Conduit.Views
@@ -55,21 +56,44 @@ namespace Conduit.Views
                 var parts = ParseCommandLine(commandLine);
                 string process = "cmd.exe";
                 List<string> args = new List<string>();
-                if (parts.Count >0)
+                if (parts.Count > 0)
                 {
-                    process = parts[0];
-                    args = parts.GetRange(1, parts.Count - 1).ToList();
+                    var processPath = PathUtils.ResolveOnPath(parts[0]);
+                    if (processPath != null)
+                    {
+                        if (String.Equals(Path.GetExtension(processPath), ".exe", StringComparison.OrdinalIgnoreCase))
+                        {
+                            process = processPath;
+                            args = parts.GetRange(1, parts.Count - 1).ToList();
+                        }
+                        else if (String.Equals(Path.GetExtension(processPath), ".cmd", StringComparison.OrdinalIgnoreCase))
+                        {
+                            process = "cmd.exe";
+                            args.Add("/c");
+                            args.Add(processPath);
+                            args.AddRange(parts.GetRange(1, parts.Count - 1));
+                        }
+                        else
+                        {
+                            // for non-exe files, try to run via wsl
+                            process = "wsl";
+                            args = parts;
+                        }
+                    }
+                    else
+                    {
+                        process = "wsl";
+                        args = parts;
+                    }
                 }
-                if (process == "cmd.exe")
-                    args.Insert(0, $"/C") ;
 
                 var terminalWindow = new ManagedTerminalWindow
                 {
                     Process = process,
                     Args = args,
                     Title = process,
-                    Width = 80 ,
-                    Height = 25 ,
+                    Width = 80,
+                    Height = 25,
                     FontFamily = "Cascadia Mono",
                     CloseOnProcessExit = true
                 };
