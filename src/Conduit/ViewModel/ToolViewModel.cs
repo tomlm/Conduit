@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Conduit.ViewModel
@@ -59,11 +60,36 @@ namespace Conduit.ViewModel
         /// Keywords for the tool
         /// </summary>
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(KeywordsText))]
         private ObservableCollection<string> _keywords = new ObservableCollection<string>();
+
+        public string KeywordsText => Keywords == null || Keywords.Count == 0
+            ? string.Empty
+            : string.Join(", ", Keywords);
 
         public string Install => GetInstallDefinitionForCurrentPlatform()?.Install ?? string.Empty;
 
         public string Uninstall => GetInstallDefinitionForCurrentPlatform()?.Uninstall ?? string.Empty;
+
+        public string PlatformSummary
+        {
+            get
+            {
+                if (Platforms == null)
+                {
+                    return string.Empty;
+                }
+
+                var platforms = new List<string>();
+
+                if (Platforms.Default != null) platforms.Add("Default");
+                if (Platforms.Windows != null) platforms.Add("Windows");
+                if (Platforms.Linux != null) platforms.Add("Linux");
+                if (Platforms.MacOS != null) platforms.Add("MacOS");
+
+                return string.Join("|", platforms);
+            }
+        }
 
         /// <summary>
         /// Command to execute tool
@@ -134,11 +160,10 @@ namespace Conduit.ViewModel
                 return null;
             }
 
-            var specific = OperatingSystem.IsWindows() ? Platforms.Windows
+            var specific = OperatingSystem.IsWindows() ? Platforms.Windows ?? Platforms.Linux
                 : OperatingSystem.IsLinux() ? Platforms.Linux
                 : OperatingSystem.IsMacOS() ? Platforms.MacOS
                 : null;
-
             return specific ?? Platforms.Default;
         }
     }

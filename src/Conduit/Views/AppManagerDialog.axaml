@@ -1,0 +1,73 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+				  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				  xmlns:console="https://github.com/consolonia"
+				  xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+				  xmlns:vm="clr-namespace:Conduit.ViewModel"
+				  mc:Ignorable="d" d:DesignWidth="120" d:DesignHeight="40"
+				  x:Class="Conduit.Views.AppManagerDialog"
+				  Title="Manage Apps"
+				  WindowState="Maximized"
+				  x:DataType="vm:AppManagerViewModel">
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto">
+		<TextBox Grid.Row="0" x:Name="SearchBox" Watermark="Search apps..." Text="{Binding SearchText}"/>
+		<Grid Grid.Row="1"
+			  ColumnDefinitions="1*,1*" >
+			<ListBox x:Name="ToolsListBox"
+					 SelectionMode="Single"
+					 ItemsSource="{Binding FilteredTools}"
+					 HorizontalAlignment="Stretch"
+					 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+					>
+				<ListBox.ItemTemplate>
+					<DataTemplate x:DataType="vm:ToolViewModel">
+						<StackPanel HorizontalAlignment="Stretch" Margin="0 0 1 0">
+							<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+							<TextBlock Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="{Binding #ToolsListBox.Bounds.Width}"/>
+							<Separator/>
+						</StackPanel>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+			<Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" >
+				<ScrollViewer Grid.Column="1">
+					<StackPanel Orientation="Vertical">
+						<Grid x:Name="DetailsContent"
+							  x:DataType="vm:ToolViewModel"
+							  ColumnDefinitions="Auto,*"
+							  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+							  DataContext="{Binding #ToolsListBox.SelectedItem}">
+							<TextBlock Grid.Row="0" Grid.Column="0" Text="ID:" FontWeight="Bold" />
+							<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Id}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="1" Grid.Column="0" Text="Name:" FontWeight="Bold" />
+							<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Name}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="2" Grid.Column="0" Text="Version:" FontWeight="Bold" />
+							<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Version}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="3" Grid.Column="0" Text="Description:" FontWeight="Bold" />
+							<TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Description}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="4" Grid.Column="0" Text="Keywords:" FontWeight="Bold" />
+							<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding KeywordsText}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="5" Grid.Column="0" Text="Platform:" FontWeight="Bold" />
+							<TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding PlatformSummary}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="6" Grid.Column="0" Text="Command:" FontWeight="Bold" />
+							<TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Command}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="7" Grid.Column="0" Text="Docs:" FontWeight="Bold" />
+							<TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Documentation}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="8" Grid.Column="0" Text="Website:" FontWeight="Bold" />
+							<TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding Website}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="9" Grid.Column="0" Text="Source:" FontWeight="Bold" />
+							<TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding Source}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="10" Grid.Column="0" Text="Install:" FontWeight="Bold" />
+							<TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding Install}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="11" Grid.Column="0" Text="Uninstall:" FontWeight="Bold" />
+							<TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding Uninstall}" TextWrapping="Wrap"/>
+						</Grid>
+					</StackPanel>
+				</ScrollViewer>
+			</Border>
+		</Grid>
+		<Button Grid.Row="2" Content="CLOSE" HorizontalAlignment="Center" Click="OnClose"/>
+	</Grid>
+</wm:ManagedWindow>
+

@@ -10,7 +10,7 @@ namespace Conduit.ViewModel
 {
     public class ToolsViewModel : ObservableCollection<ToolViewModel>
     {
-        private readonly ObjectSearchEngine _toolSearch = new ObjectSearchEngine();
+        private readonly ObjectSearchEngine _toolSearch;
 
         private static readonly Uri ToolsFolderApiUri = new(
             "https://api.github.com/repos/tomlm/Conduit/contents/src/Conduit/Tools?ref=main");
@@ -22,16 +22,21 @@ namespace Conduit.ViewModel
 
         public ToolsViewModel()
         {
+            _toolSearch = new ObjectSearchEngine();
+
             // add listener callback for items added to this collection
             this.CollectionChanged += (s, e) =>
             {
-                if (e.NewItems != null)
+                lock (_toolSearch)
                 {
-                    _toolSearch.AddObjects(e.NewItems.Cast<ToolViewModel>());
-                }
-                if (e.OldItems != null)
-                {
-                    _toolSearch.RemoveObjects(e.OldItems.Cast<ToolViewModel>());
+                    if (e.NewItems != null)
+                    {
+                        _toolSearch.AddObjects(e.NewItems.Cast<ToolViewModel>());
+                    }
+                    if (e.OldItems != null)
+                    {
+                        _toolSearch.RemoveObjects(e.OldItems.Cast<ToolViewModel>());
+                    }
                 }
             };
 

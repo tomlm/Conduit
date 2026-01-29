@@ -25,10 +25,7 @@ namespace Conduit.Views
 
         private void OnManageApps(object? sender, RoutedEventArgs e)
         {
-            var dialog = new ManageAppsDialog
-            {
-                DataContext = this.DataContext
-            };
+            var dialog = new AppManagerDialog((AppViewModel)this.DataContext!);
             dialog.Show(Windows);
         }
 

@@ -1,4 +1,5 @@
 <Solution>
   <Folder Name="/Solution Items/" />
+  <Project Path="../../ObjectSearch.Net/source/ObjectSearch.Net/ObjectSearch.Net.csproj" />
   <Project Path="Conduit/Conduit.csproj" Id="9e28bf2e-f2fc-44e9-857d-663aaf0cf008" />
 </Solution>
