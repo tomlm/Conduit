@@ -176,7 +176,7 @@ namespace Conduit.Controls
             };
 
             // Subscribe to TerminalView attached events bubbling from the inner TerminalView.
-            TerminalView.AddProcessExitedHandler(_terminalControl, OnTerminalControlProcessExited);
+            _terminalControl.ProcessExited += OnTerminalControlProcessExited;
             TerminalView.AddTitleChangedHandler(_terminalControl, OnTerminalTitleChanged);
             TerminalView.AddWindowMovedHandler(_terminalControl, OnTerminalWindowMoved);
             TerminalView.AddWindowResizedHandler(_terminalControl, OnTerminalWindowResized);
@@ -270,7 +270,7 @@ namespace Conduit.Controls
 
             if (_terminalControl != null)
             {
-                TerminalView.RemoveProcessExitedHandler(_terminalControl, OnTerminalControlProcessExited);
+                _terminalControl.ProcessExited -= OnTerminalControlProcessExited;
                 TerminalView.RemoveTitleChangedHandler(_terminalControl, OnTerminalTitleChanged);
                 TerminalView.RemoveWindowMovedHandler(_terminalControl, OnTerminalWindowMoved);
                 TerminalView.RemoveWindowResizedHandler(_terminalControl, OnTerminalWindowResized);
